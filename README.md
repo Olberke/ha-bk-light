@@ -59,3 +59,15 @@ higher frame rates. Native panel-side scrolling is not yet implemented.
 
 The integration is under active development and has been tested with an
 ACT1026 32×32 panel.
+
+## Credits and attribution
+
+This Home Assistant integration is based on and derives from the BK-Light
+toolkit created by [Puparia](https://github.com/Pupariaa).
+
+Original project:
+[Pupariaa/Bk-Light-AppBypass](https://github.com/Pupariaa/Bk-Light-AppBypass)
+
+The original BK-Light toolkit is licensed under the MIT License.
+
+Copyright (c) 2025 Puparia (Pupariaa)
