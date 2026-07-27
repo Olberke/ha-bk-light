@@ -21,6 +21,8 @@ from PIL import Image, ImageEnhance
 from homeassistant.components import bluetooth
 from homeassistant.components.bluetooth import BluetoothReachabilityIntent
 from homeassistant.core import HomeAssistant
+from .protocol import BkLightDeviceInfo, parse_device_info_response
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -180,6 +182,7 @@ class AckWatcher:
         self.stage_one = asyncio.Event()
         self.stage_two = asyncio.Event()
         self.stage_three = asyncio.Event()
+        self.stage_one_payload: bytes | None = None
 
     def reset(self) -> None:
         """Clear all acknowledgement events."""
@@ -203,7 +206,9 @@ class AckWatcher:
             )
 
         if payload in (ACK_STAGE_ONE, ACK_STAGE_ONE_ALT):
+            self.stage_one_payload = payload
             self.stage_one.set()
+
         elif payload in (ACK_STAGE_TWO, ACK_STAGE_TWO_ALT):
             self.stage_two.set()
         elif payload == ACK_STAGE_THREE:
@@ -294,6 +299,7 @@ class BleDisplaySession:
 
         self.client: BleakClientWithServiceCache | None = None
         self.watcher = AckWatcher(self.address, log_notifications)
+        self._device_info: BkLightDeviceInfo | None = None
 
         self._handshake_primed = False
         self._frames_since_validation = 0
@@ -305,6 +311,11 @@ class BleDisplaySession:
     def is_connected(self) -> bool:
         """Return whether the BLE client currently reports a connection."""
         return bool(self.client and self.client.is_connected)
+
+    @property
+    def device_info(self) -> BkLightDeviceInfo | None:
+        """Return the most recently received device information."""
+        return self._device_info
 
     def set_rotation(self, rotation: int) -> None:
         """Update image rotation for future frames."""
@@ -608,11 +619,14 @@ class BleDisplaySession:
         self.watcher.reset()
 
         if not self._handshake_primed:
+            self.watcher.stage_one_payload = None
+
             await client.write_gatt_char(
                 UUID_WRITE,
                 HANDSHAKE_FIRST,
                 response=False,
             )
+
             await wait_for_ack(
                 self.watcher.stage_one,
                 "handshake stage one",
@@ -620,6 +634,31 @@ class BleDisplaySession:
                 self.ack_timeout,
                 self.log_notifications,
             )
+            stage_one_payload = self.watcher.stage_one_payload
+
+            if stage_one_payload is None:
+                raise BkLightProtocolError(
+                    f"{self.address}: stage-one acknowledgement contained no payload"
+                )
+
+            try:
+                device_info = parse_device_info_response(stage_one_payload)
+            except ValueError as err:
+                raise BkLightProtocolError(
+                    f"{self.address}: invalid device-info response: {err}"
+                ) from err
+
+            if device_info != self._device_info:
+                _LOGGER.info(
+                    "%s: detected BK-Light device type 0x%02X, "
+                    "dimensions %s, raw response %s",
+                    self.address,
+                    device_info.device_type,
+                    device_info.dimensions_text,
+                    bytes_to_hex(device_info.raw_response),
+                )
+
+            self._device_info = device_info
             await asyncio.sleep(delay)
 
             self.watcher.stage_two.clear()
