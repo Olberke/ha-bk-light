@@ -1,0 +1,37 @@
+{
+  "services": {
+    "display_text": {
+      "service": "mdi:format-text",
+      "sections": {
+        "appearance": "mdi:palette",
+        "position": "mdi:arrow-all"
+      }
+    },
+    "scroll_text": {
+      "service": "mdi:format-text-rotation-none",
+      "sections": {
+        "appearance": "mdi:palette",
+        "motion": "mdi:play",
+        "advanced": "mdi:tune"
+      }
+    },
+    "display_image": {
+      "service": "mdi:image",
+      "sections": {
+        "appearance": "mdi:palette",
+        "transform": "mdi:rotate-right"
+      }
+    },
+    "play_gif": {
+      "service": "mdi:animation-play",
+      "sections": {
+        "playback": "mdi:play",
+        "appearance": "mdi:palette",
+        "transform": "mdi:rotate-right"
+      }
+    },
+    "stop_animation": {
+      "service": "mdi:stop-circle-outline"
+    }
+  }
+}

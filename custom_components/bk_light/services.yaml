@@ -1,0 +1,363 @@
+display_text:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: bk_light
+
+    text:
+      required: true
+      selector:
+        text:
+          multiline: true
+
+    appearance:
+      collapsed: false
+      fields:
+        text_color:
+          default: [255, 255, 255]
+          selector:
+            color_rgb:
+
+        background_color:
+          default: [0, 0, 0]
+          selector:
+            color_rgb:
+
+        font_size:
+          default: 20
+          selector:
+            number:
+              min: 5
+              max: 64
+              step: 1
+              unit_of_measurement: px
+              mode: slider
+
+        auto_fit:
+          default: true
+          selector:
+            boolean:
+
+    position:
+      collapsed: true
+      fields:
+        horizontal_align:
+          default: center
+          selector:
+            select:
+              translation_key: horizontal_alignment
+              options: [left, center, right]
+
+        vertical_align:
+          default: center
+          selector:
+            select:
+              translation_key: vertical_alignment
+              options: [top, center, bottom]
+
+        x_offset:
+          default: 0
+          selector:
+            number:
+              min: -32
+              max: 32
+              step: 1
+              unit_of_measurement: px
+              mode: box
+
+        y_offset:
+          default: 0
+          selector:
+            number:
+              min: -32
+              max: 32
+              step: 1
+              unit_of_measurement: px
+              mode: box
+
+
+scroll_text:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: bk_light
+
+    text:
+      required: true
+      selector:
+        text:
+
+    appearance:
+      collapsed: false
+      fields:
+        text_color:
+          default: [255, 255, 255]
+          selector:
+            color_rgb:
+
+        background_color:
+          default: [0, 0, 0]
+          selector:
+            color_rgb:
+
+        font_size:
+          default: 20
+          selector:
+            number:
+              min: 5
+              max: 64
+              step: 1
+              unit_of_measurement: px
+              mode: slider
+
+        auto_fit:
+          default: true
+          selector:
+            boolean:
+
+        vertical_align:
+          default: center
+          selector:
+            select:
+              translation_key: vertical_alignment
+              options: [top, center, bottom]
+
+    motion:
+      collapsed: false
+      fields:
+        direction:
+          default: left
+          selector:
+            select:
+              translation_key: scroll_direction
+              options: [left, right]
+
+        fps:
+          default: 8
+          selector:
+            number:
+              min: 1
+              max: 12
+              step: 1
+              unit_of_measurement: FPS
+              mode: slider
+
+        step:
+          default: 1
+          selector:
+            number:
+              min: 1
+              max: 8
+              step: 1
+              unit_of_measurement: px
+              mode: slider
+
+        repeat:
+          default: 1
+          selector:
+            number:
+              min: 0
+              max: 100
+              step: 1
+              mode: box
+
+    advanced:
+      collapsed: true
+      fields:
+        gap:
+          default: 8
+          selector:
+            number:
+              min: 0
+              max: 64
+              step: 1
+              unit_of_measurement: px
+              mode: box
+
+        y_offset:
+          default: 0
+          selector:
+            number:
+              min: -32
+              max: 32
+              step: 1
+              unit_of_measurement: px
+              mode: box
+
+
+display_image:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: bk_light
+
+    media:
+      required: true
+      selector:
+        media:
+          accept:
+            - image/*
+
+    appearance:
+      collapsed: false
+      fields:
+        fit:
+          default: contain
+          selector:
+            select:
+              translation_key: image_fit
+              options: [contain, cover, stretch]
+
+        background_color:
+          default: [0, 0, 0]
+          selector:
+            color_rgb:
+
+        brightness:
+          default: 1.0
+          selector:
+            number:
+              min: 0.05
+              max: 2.0
+              step: 0.05
+              mode: slider
+
+        resampling:
+          default: lanczos
+          selector:
+            select:
+              translation_key: resampling
+              options: [lanczos, nearest]
+
+    transform:
+      collapsed: true
+      fields:
+        rotation:
+          default: "0"
+          selector:
+            select:
+              translation_key: rotation
+              options: ["0", "90", "180", "270"]
+
+        mirror_horizontal:
+          default: false
+          selector:
+            boolean:
+
+        mirror_vertical:
+          default: false
+          selector:
+            boolean:
+
+
+play_gif:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: bk_light
+
+    media:
+      required: true
+      selector:
+        media:
+          accept:
+            - image/gif
+
+    playback:
+      collapsed: false
+      fields:
+        speed:
+          default: 1.0
+          selector:
+            number:
+              min: 0.25
+              max: 4.0
+              step: 0.25
+              mode: slider
+
+        max_fps:
+          default: 8
+          selector:
+            number:
+              min: 1
+              max: 12
+              step: 1
+              unit_of_measurement: FPS
+              mode: slider
+
+        repeat:
+          default: 1
+          selector:
+            number:
+              min: 0
+              max: 100
+              step: 1
+              mode: box
+
+    appearance:
+      collapsed: true
+      fields:
+        fit:
+          default: contain
+          selector:
+            select:
+              translation_key: image_fit
+              options: [contain, cover, stretch]
+
+        background_color:
+          default: [0, 0, 0]
+          selector:
+            color_rgb:
+
+        brightness:
+          default: 1.0
+          selector:
+            number:
+              min: 0.05
+              max: 2.0
+              step: 0.05
+              mode: slider
+
+        resampling:
+          default: nearest
+          selector:
+            select:
+              translation_key: resampling
+              options: [nearest, lanczos]
+
+    transform:
+      collapsed: true
+      fields:
+        rotation:
+          default: "0"
+          selector:
+            select:
+              translation_key: rotation
+              options: ["0", "90", "180", "270"]
+
+        mirror_horizontal:
+          default: false
+          selector:
+            boolean:
+
+        mirror_vertical:
+          default: false
+          selector:
+            boolean:
+
+
+stop_animation:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: bk_light

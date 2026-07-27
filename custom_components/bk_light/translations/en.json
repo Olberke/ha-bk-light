@@ -1,0 +1,326 @@
+{
+  "title": "BK-Light LED Matrix",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Select BK-Light",
+        "description": "Select the BK-Light LED matrix to set up.",
+        "data": {
+          "address": "Bluetooth device"
+        }
+      },
+      "bluetooth_confirm": {
+        "title": "BK-Light discovered",
+        "description": "Do you want to set up {name}?"
+      }
+    },
+    "abort": {
+      "already_configured": "This BK-Light device is already configured.",
+      "no_devices_found": "No reachable BK-Light LED matrix was found.",
+      "not_supported": "The discovered Bluetooth device is not supported."
+    }
+  },
+  "selector": {
+    "horizontal_alignment": {
+      "options": {
+        "left": "Left",
+        "center": "Center",
+        "right": "Right"
+      }
+    },
+    "vertical_alignment": {
+      "options": {
+        "top": "Top",
+        "center": "Center",
+        "bottom": "Bottom"
+      }
+    },
+    "scroll_direction": {
+      "options": {
+        "left": "Left",
+        "right": "Right"
+      }
+    },
+    "image_fit": {
+      "options": {
+        "contain": "Show whole image",
+        "cover": "Fill panel",
+        "stretch": "Stretch to panel"
+      }
+    },
+    "rotation": {
+      "options": {
+        "0": "No rotation",
+        "90": "90° clockwise",
+        "180": "180°",
+        "270": "270° clockwise"
+      }
+    },
+    "resampling": {
+      "options": {
+        "nearest": "Pixel art",
+        "lanczos": "Smooth scaling"
+      }
+    }
+  },
+  "services": {
+    "display_text": {
+      "name": "Display text",
+      "description": "Displays static text on the LED matrix.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Select the BK-Light display."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Text to display."
+        },
+        "text_color": {
+          "name": "Text color",
+          "description": "Color of the text."
+        },
+        "background_color": {
+          "name": "Background color",
+          "description": "Color of the background."
+        },
+        "font_size": {
+          "name": "Font size",
+          "description": "Initial font size."
+        },
+        "auto_fit": {
+          "name": "Auto fit",
+          "description": "Shrinks the font when necessary."
+        },
+        "horizontal_align": {
+          "name": "Horizontal alignment",
+          "description": "Align the text horizontally."
+        },
+        "vertical_align": {
+          "name": "Vertical alignment",
+          "description": "Align the text vertically."
+        },
+        "x_offset": {
+          "name": "X offset",
+          "description": "Horizontal offset in pixels."
+        },
+        "y_offset": {
+          "name": "Y offset",
+          "description": "Vertical offset in pixels."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Appearance",
+          "description": "Configure colors and font."
+        },
+        "position": {
+          "name": "Position",
+          "description": "Configure alignment and pixel offsets."
+        }
+      }
+    },
+    "scroll_text": {
+      "name": "Scroll text",
+      "description": "Displays horizontally scrolling text.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Select the BK-Light display."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Text to scroll."
+        },
+        "text_color": {
+          "name": "Text color",
+          "description": "Color of the text."
+        },
+        "background_color": {
+          "name": "Background color",
+          "description": "Color of the background."
+        },
+        "font_size": {
+          "name": "Font size",
+          "description": "Font size of the scrolling text."
+        },
+        "auto_fit": {
+          "name": "Auto fit",
+          "description": "Fits the font height automatically."
+        },
+        "vertical_align": {
+          "name": "Vertical alignment",
+          "description": "Align the text vertically."
+        },
+        "direction": {
+          "name": "Direction",
+          "description": "Select the scrolling direction."
+        },
+        "fps": {
+          "name": "Frames per second",
+          "description": "Recommended: 8 to 10 FPS."
+        },
+        "step": {
+          "name": "Pixel step",
+          "description": "Pixel movement per frame."
+        },
+        "repeat": {
+          "name": "Repeats",
+          "description": "0 means endless."
+        },
+        "gap": {
+          "name": "Gap",
+          "description": "Blank space after the text."
+        },
+        "y_offset": {
+          "name": "Y offset",
+          "description": "Vertical offset in pixels."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Appearance",
+          "description": "Configure colors and font."
+        },
+        "motion": {
+          "name": "Motion",
+          "description": "Configure speed, direction and repeats."
+        },
+        "advanced": {
+          "name": "Advanced",
+          "description": "Configure gap and vertical correction."
+        }
+      }
+    },
+    "display_image": {
+      "name": "Display image",
+      "description": "Displays an image from Local media.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Select the BK-Light display."
+        },
+        "media": {
+          "name": "Image",
+          "description": "Select an image from the Home Assistant media browser."
+        },
+        "fit": {
+          "name": "Fit",
+          "description": "Choose how the image fits the panel."
+        },
+        "background_color": {
+          "name": "Background color",
+          "description": "Background for transparency or empty areas."
+        },
+        "brightness": {
+          "name": "Brightness",
+          "description": "Image brightness multiplier."
+        },
+        "resampling": {
+          "name": "Scaling",
+          "description": "Choose pixel-art or smooth scaling."
+        },
+        "rotation": {
+          "name": "Rotation",
+          "description": "Rotate the image clockwise."
+        },
+        "mirror_horizontal": {
+          "name": "Mirror horizontally",
+          "description": "Mirror left and right."
+        },
+        "mirror_vertical": {
+          "name": "Mirror vertically",
+          "description": "Mirror top and bottom."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Appearance",
+          "description": "Configure fit, background and scaling."
+        },
+        "transform": {
+          "name": "Rotate and mirror",
+          "description": "Correct the image orientation."
+        }
+      }
+    },
+    "play_gif": {
+      "name": "Play GIF",
+      "description": "Plays a GIF from Local media.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Select the BK-Light display."
+        },
+        "media": {
+          "name": "GIF",
+          "description": "Select a GIF from the Home Assistant media browser."
+        },
+        "speed": {
+          "name": "Speed",
+          "description": "1.0 uses the original GIF timing."
+        },
+        "max_fps": {
+          "name": "Maximum FPS",
+          "description": "Limits Bluetooth frame transfers per second."
+        },
+        "repeat": {
+          "name": "Repeats",
+          "description": "0 means endless."
+        },
+        "fit": {
+          "name": "Fit",
+          "description": "Choose how the GIF fits the panel."
+        },
+        "background_color": {
+          "name": "Background color",
+          "description": "Background for transparency."
+        },
+        "brightness": {
+          "name": "Brightness",
+          "description": "Animation brightness multiplier."
+        },
+        "resampling": {
+          "name": "Scaling",
+          "description": "Choose pixel-art or smooth scaling."
+        },
+        "rotation": {
+          "name": "Rotation",
+          "description": "Rotate the animation clockwise."
+        },
+        "mirror_horizontal": {
+          "name": "Mirror horizontally",
+          "description": "Mirror left and right."
+        },
+        "mirror_vertical": {
+          "name": "Mirror vertically",
+          "description": "Mirror top and bottom."
+        }
+      },
+      "sections": {
+        "playback": {
+          "name": "Playback",
+          "description": "Configure speed, FPS and repeats."
+        },
+        "appearance": {
+          "name": "Appearance",
+          "description": "Configure fit, background and scaling."
+        },
+        "transform": {
+          "name": "Rotate and mirror",
+          "description": "Correct the animation orientation."
+        }
+      }
+    },
+    "stop_animation": {
+      "name": "Stop animation",
+      "description": "Stops the current scrolling-text or GIF animation.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Select the BK-Light display."
+        }
+      }
+    }
+  }
+}

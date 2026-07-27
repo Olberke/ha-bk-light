@@ -1,0 +1,20 @@
+{
+  "domain": "bk_light",
+  "name": "BK-Light LED Matrix",
+  "version": "0.6.0",
+  "config_flow": true,
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "codeowners": [],
+  "dependencies": [
+    "bluetooth_adapters",
+    "media_source"
+  ],
+  "requirements": [],
+  "bluetooth": [
+    {
+      "local_name": "LED_BLE_*",
+      "connectable": true
+    }
+  ]
+}

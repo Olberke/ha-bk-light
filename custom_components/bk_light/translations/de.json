@@ -1,0 +1,326 @@
+{
+  "title": "BK-Light LED-Matrix",
+  "config": {
+    "step": {
+      "user": {
+        "title": "BK-Light auswählen",
+        "description": "Wähle die BK-Light LED-Matrix aus, die eingerichtet werden soll.",
+        "data": {
+          "address": "Bluetooth-Gerät"
+        }
+      },
+      "bluetooth_confirm": {
+        "title": "BK-Light gefunden",
+        "description": "Möchtest du {name} einrichten?"
+      }
+    },
+    "abort": {
+      "already_configured": "Dieses BK-Light-Gerät ist bereits eingerichtet.",
+      "no_devices_found": "Keine erreichbare BK-Light LED-Matrix gefunden.",
+      "not_supported": "Das gefundene Bluetooth-Gerät wird nicht unterstützt."
+    }
+  },
+  "selector": {
+    "horizontal_alignment": {
+      "options": {
+        "left": "Links",
+        "center": "Mittig",
+        "right": "Rechts"
+      }
+    },
+    "vertical_alignment": {
+      "options": {
+        "top": "Oben",
+        "center": "Mittig",
+        "bottom": "Unten"
+      }
+    },
+    "scroll_direction": {
+      "options": {
+        "left": "Nach links",
+        "right": "Nach rechts"
+      }
+    },
+    "image_fit": {
+      "options": {
+        "contain": "Ganzes Bild",
+        "cover": "Panel ausfüllen",
+        "stretch": "Auf Panel strecken"
+      }
+    },
+    "rotation": {
+      "options": {
+        "0": "Keine Drehung",
+        "90": "90° im Uhrzeigersinn",
+        "180": "180°",
+        "270": "270° im Uhrzeigersinn"
+      }
+    },
+    "resampling": {
+      "options": {
+        "nearest": "Pixelgrafik",
+        "lanczos": "Weiche Skalierung"
+      }
+    }
+  },
+  "services": {
+    "display_text": {
+      "name": "Text anzeigen",
+      "description": "Zeigt statischen Text auf der LED-Matrix an.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "BK-Light Display auswählen."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Text, der angezeigt werden soll."
+        },
+        "text_color": {
+          "name": "Textfarbe",
+          "description": "Farbe des Textes."
+        },
+        "background_color": {
+          "name": "Hintergrundfarbe",
+          "description": "Farbe des Hintergrunds."
+        },
+        "font_size": {
+          "name": "Schriftgröße",
+          "description": "Ausgangsgröße der Schrift."
+        },
+        "auto_fit": {
+          "name": "Automatisch einpassen",
+          "description": "Verkleinert die Schrift bei Bedarf."
+        },
+        "horizontal_align": {
+          "name": "Horizontale Ausrichtung",
+          "description": "Text horizontal ausrichten."
+        },
+        "vertical_align": {
+          "name": "Vertikale Ausrichtung",
+          "description": "Text vertikal ausrichten."
+        },
+        "x_offset": {
+          "name": "X-Verschiebung",
+          "description": "Horizontale Verschiebung in Pixeln."
+        },
+        "y_offset": {
+          "name": "Y-Verschiebung",
+          "description": "Vertikale Verschiebung in Pixeln."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Darstellung",
+          "description": "Farben und Schrift konfigurieren."
+        },
+        "position": {
+          "name": "Position",
+          "description": "Ausrichtung und Pixelkorrektur konfigurieren."
+        }
+      }
+    },
+    "scroll_text": {
+      "name": "Laufschrift anzeigen",
+      "description": "Zeigt horizontal laufenden Text an.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "BK-Light Display auswählen."
+        },
+        "text": {
+          "name": "Text",
+          "description": "Text der Laufschrift."
+        },
+        "text_color": {
+          "name": "Textfarbe",
+          "description": "Farbe des Textes."
+        },
+        "background_color": {
+          "name": "Hintergrundfarbe",
+          "description": "Farbe des Hintergrunds."
+        },
+        "font_size": {
+          "name": "Schriftgröße",
+          "description": "Schriftgröße der Laufschrift."
+        },
+        "auto_fit": {
+          "name": "Automatisch einpassen",
+          "description": "Passt die Schrifthöhe an."
+        },
+        "vertical_align": {
+          "name": "Vertikale Ausrichtung",
+          "description": "Text vertikal ausrichten."
+        },
+        "direction": {
+          "name": "Richtung",
+          "description": "Laufrichtung auswählen."
+        },
+        "fps": {
+          "name": "Bilder pro Sekunde",
+          "description": "Empfohlen: 8 bis 10 FPS."
+        },
+        "step": {
+          "name": "Pixelschritt",
+          "description": "Pixelbewegung pro Bild."
+        },
+        "repeat": {
+          "name": "Wiederholungen",
+          "description": "0 bedeutet endlos."
+        },
+        "gap": {
+          "name": "Abstand",
+          "description": "Leerraum nach dem Text."
+        },
+        "y_offset": {
+          "name": "Y-Verschiebung",
+          "description": "Vertikale Verschiebung in Pixeln."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Darstellung",
+          "description": "Farben und Schrift konfigurieren."
+        },
+        "motion": {
+          "name": "Bewegung",
+          "description": "Geschwindigkeit, Richtung und Wiederholungen."
+        },
+        "advanced": {
+          "name": "Erweitert",
+          "description": "Abstand und vertikale Korrektur."
+        }
+      }
+    },
+    "display_image": {
+      "name": "Bild anzeigen",
+      "description": "Zeigt ein Bild aus Lokale Medien an.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "BK-Light Display auswählen."
+        },
+        "media": {
+          "name": "Bild",
+          "description": "Bild über den Home-Assistant-Medienbrowser auswählen."
+        },
+        "fit": {
+          "name": "Einpassung",
+          "description": "Wie das Bild in das Panel eingepasst wird."
+        },
+        "background_color": {
+          "name": "Hintergrundfarbe",
+          "description": "Hintergrund bei Transparenz oder freien Flächen."
+        },
+        "brightness": {
+          "name": "Helligkeit",
+          "description": "Helligkeitsfaktor des Bildes."
+        },
+        "resampling": {
+          "name": "Skalierung",
+          "description": "Pixelgrafik oder weiche Skalierung."
+        },
+        "rotation": {
+          "name": "Drehung",
+          "description": "Bild im Uhrzeigersinn drehen."
+        },
+        "mirror_horizontal": {
+          "name": "Horizontal spiegeln",
+          "description": "Bild links und rechts spiegeln."
+        },
+        "mirror_vertical": {
+          "name": "Vertikal spiegeln",
+          "description": "Bild oben und unten spiegeln."
+        }
+      },
+      "sections": {
+        "appearance": {
+          "name": "Darstellung",
+          "description": "Einpassung, Hintergrund und Skalierung."
+        },
+        "transform": {
+          "name": "Drehen und Spiegeln",
+          "description": "Bildausrichtung korrigieren."
+        }
+      }
+    },
+    "play_gif": {
+      "name": "GIF abspielen",
+      "description": "Spielt ein GIF aus Lokale Medien ab.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "BK-Light Display auswählen."
+        },
+        "media": {
+          "name": "GIF",
+          "description": "GIF über den Home-Assistant-Medienbrowser auswählen."
+        },
+        "speed": {
+          "name": "Geschwindigkeit",
+          "description": "1,0 entspricht der GIF-Originalgeschwindigkeit."
+        },
+        "max_fps": {
+          "name": "Maximale FPS",
+          "description": "Begrenzt die BLE-Übertragungen pro Sekunde."
+        },
+        "repeat": {
+          "name": "Wiederholungen",
+          "description": "0 bedeutet endlos."
+        },
+        "fit": {
+          "name": "Einpassung",
+          "description": "Wie das GIF in das Panel eingepasst wird."
+        },
+        "background_color": {
+          "name": "Hintergrundfarbe",
+          "description": "Hintergrund bei Transparenz."
+        },
+        "brightness": {
+          "name": "Helligkeit",
+          "description": "Helligkeitsfaktor der Animation."
+        },
+        "resampling": {
+          "name": "Skalierung",
+          "description": "Pixelgrafik oder weiche Skalierung."
+        },
+        "rotation": {
+          "name": "Drehung",
+          "description": "Animation im Uhrzeigersinn drehen."
+        },
+        "mirror_horizontal": {
+          "name": "Horizontal spiegeln",
+          "description": "Animation links und rechts spiegeln."
+        },
+        "mirror_vertical": {
+          "name": "Vertikal spiegeln",
+          "description": "Animation oben und unten spiegeln."
+        }
+      },
+      "sections": {
+        "playback": {
+          "name": "Wiedergabe",
+          "description": "Geschwindigkeit, FPS und Wiederholungen."
+        },
+        "appearance": {
+          "name": "Darstellung",
+          "description": "Einpassung, Hintergrund und Skalierung."
+        },
+        "transform": {
+          "name": "Drehen und Spiegeln",
+          "description": "Animationsausrichtung korrigieren."
+        }
+      }
+    },
+    "stop_animation": {
+      "name": "Animation stoppen",
+      "description": "Stoppt die aktuell laufende Laufschrift oder GIF-Animation.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "BK-Light Display auswählen."
+        }
+      }
+    }
+  }
+}
