@@ -37,6 +37,7 @@ _LOGGER = logging.getLogger(__name__)
 UUID_WRITE = "0000fa02-0000-1000-8000-00805f9b34fb"
 UUID_NOTIFY = "0000fa03-0000-1000-8000-00805f9b34fb"
 
+HANDSHAKE_FIRST = bytes.fromhex("08 00 01 80 0E 06 32 00")
 HANDSHAKE_SECOND = bytes.fromhex("04 00 05 80")
 
 ACK_STAGE_ONE = bytes.fromhex("0C 00 01 80 81 06 32 00 00 01 00 01")
@@ -646,7 +647,7 @@ class BleDisplaySession:
         show_date: bool,
         delay: float,
     ) -> None:
-        """Send the native clock command once."""
+        """Send the native clock commands once."""
         await self._ensure_connected()
 
         client = self.client
@@ -657,59 +658,9 @@ class BleDisplaySession:
             )
 
         self.watcher.reset()
-        self.watcher.stage_one_payload = None
 
-        # The time synchronization command also returns device
-        # information through the notification characteristic.
-        await client.write_gatt_char(
-            UUID_WRITE,
-            time_command,
-            response=False,
-        )
-
-        await wait_for_ack(
-            self.watcher.stage_one,
-            "clock time synchronization",
-            self.address,
-            self.ack_timeout,
-            self.log_notifications,
-        )
-
-        stage_one_payload = self.watcher.stage_one_payload
-
-        if stage_one_payload is None:
-            raise BkLightProtocolError(
-                f"{self.address}: clock time synchronization "
-                "contained no device-information payload"
-            )
-
-        try:
-            device_info = parse_device_info_response(
-                stage_one_payload
-            )
-        except ValueError as err:
-            raise BkLightProtocolError(
-                f"{self.address}: invalid device-info "
-                f"response during clock synchronization: {err}"
-            ) from err
-
-        if device_info != self._device_info:
-            _LOGGER.info(
-                "%s: detected BK-Light device type 0x%02X, "
-                "dimensions %s, raw response %s",
-                self.address,
-                device_info.device_type,
-                device_info.dimensions_text,
-                bytes_to_hex(device_info.raw_response),
-            )
-
-        self._device_info = device_info
-
-        await asyncio.sleep(delay)
-
-        # Native clock commands are short control commands and are
-        # written without a GATT response, matching the documented
-        # protocol implementations.
+        # Activate the native clock first. Short control commands do not
+        # consistently produce a notification on every firmware version.
         await client.write_gatt_char(
             UUID_WRITE,
             clock_command,
@@ -717,6 +668,74 @@ class BleDisplaySession:
         )
 
         await asyncio.sleep(delay)
+
+        # Synchronize the panel time. The command may return device
+        # information, but the notification is optional here.
+        self.watcher.stage_one.clear()
+        self.watcher.stage_one_payload = None
+
+        await client.write_gatt_char(
+            UUID_WRITE,
+            time_command,
+            response=False,
+        )
+
+        try:
+            await asyncio.wait_for(
+                self.watcher.stage_one.wait(),
+                timeout=min(self.ack_timeout, 1.0),
+            )
+        except TimeoutError:
+            _LOGGER.debug(
+                "%s: panel omitted the optional notification "
+                "after clock time synchronization",
+                self.address,
+            )
+        else:
+            stage_one_payload = self.watcher.stage_one_payload
+
+            if stage_one_payload is not None:
+                try:
+                    device_info = parse_device_info_response(
+                        stage_one_payload
+                    )
+                except ValueError as err:
+                    _LOGGER.debug(
+                        "%s: ignored unexpected response after "
+                        "clock time synchronization: %s; raw=%s",
+                        self.address,
+                        err,
+                        bytes_to_hex(stage_one_payload),
+                    )
+                else:
+                    if device_info != self._device_info:
+                        _LOGGER.info(
+                            "%s: detected BK-Light device type 0x%02X, "
+                            "dimensions %s, raw response %s",
+                            self.address,
+                            device_info.device_type,
+                            device_info.dimensions_text,
+                            bytes_to_hex(
+                                device_info.raw_response
+                            ),
+                        )
+
+                    self._device_info = device_info
+
+        await asyncio.sleep(delay)
+
+        # A later image, text or animation action must perform its normal
+        # complete image handshake.
+        self._reset_protocol_state()
+
+        _LOGGER.info(
+            "%s: native clock activated: style=%d, "
+            "24h=%s, date=%s",
+            self.address,
+            style,
+            format_24h,
+            show_date,
+        )
 
         # Force a complete image handshake if a later action replaces
         # the clock with a text, image or animation frame.
@@ -799,7 +818,11 @@ class BleDisplaySession:
         if not self._handshake_primed:
             self.watcher.stage_one_payload = None
 
-            time_command = build_time_command(self._local_now())
+            await client.write_gatt_char(
+                UUID_WRITE,
+                HANDSHAKE_FIRST,
+                response=False,
+            )
 
             await client.write_gatt_char(
                 UUID_WRITE,
