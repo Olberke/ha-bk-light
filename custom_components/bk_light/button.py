@@ -116,7 +116,7 @@ def create_test_image(
     width: int,
     height: int,
 ) -> bytes:
-    """Create a centered four-color test image."""
+    """Create a BK-Light pulse test image."""
     if width <= 0 or height <= 0:
         raise ValueError(
             "Panel width and height must be greater than zero"
@@ -125,46 +125,131 @@ def create_test_image(
     image = Image.new(
         mode="RGB",
         size=(width, height),
-        color=(0, 0, 0),
+        color=(5, 7, 16),
     )
     draw = ImageDraw.Draw(image)
 
     center_x = width // 2
     center_y = height // 2
 
-    draw.rectangle(
-        (0, 0, center_x - 1, center_y - 1),
-        fill=(255, 0, 0),
+    # Skalierung für unterschiedliche Panelgrößen.
+    max_radius = max(2, min(width, height) // 2 - 2)
+
+    # Äußere, rautenförmige Signalringe.
+    ring_colors = (
+        (20, 85, 135),
+        (30, 150, 165),
+        (120, 55, 190),
     )
-    draw.rectangle(
-        (center_x, 0, width - 1, center_y - 1),
-        fill=(0, 255, 0),
+
+    ring_radii = (
+        max_radius,
+        max(2, max_radius - 3),
+        max(2, max_radius - 6),
     )
-    draw.rectangle(
-        (0, center_y, center_x - 1, height - 1),
-        fill=(0, 0, 255),
+
+    for radius, color in zip(
+        ring_radii,
+        ring_colors,
+        strict=True,
+    ):
+        points = [
+            (center_x, center_y - radius),
+            (center_x + radius, center_y),
+            (center_x, center_y + radius),
+            (center_x - radius, center_y),
+            (center_x, center_y - radius),
+        ]
+        draw.line(
+            points,
+            fill=color,
+            width=1,
+        )
+
+    # Innerer leuchtender Diamant.
+    outer_core_radius = max(2, min(width, height) // 6)
+    inner_core_radius = max(1, outer_core_radius - 2)
+
+    draw.polygon(
+        [
+            (center_x, center_y - outer_core_radius),
+            (center_x + outer_core_radius, center_y),
+            (center_x, center_y + outer_core_radius),
+            (center_x - outer_core_radius, center_y),
+        ],
+        fill=(215, 55, 155),
     )
-    draw.rectangle(
-        (center_x, center_y, width - 1, height - 1),
+
+    draw.polygon(
+        [
+            (center_x, center_y - inner_core_radius),
+            (center_x + inner_core_radius, center_y),
+            (center_x, center_y + inner_core_radius),
+            (center_x - inner_core_radius, center_y),
+        ],
+        fill=(255, 145, 45),
+    )
+
+    # Heller Mittelpunkt.
+    draw.point(
+        (center_x, center_y),
         fill=(255, 255, 255),
     )
 
-    cross_width = 2
+    if center_x > 0:
+        draw.point(
+            (center_x - 1, center_y),
+            fill=(255, 235, 170),
+        )
 
-    vertical_start = (width - cross_width) // 2
-    vertical_end = vertical_start + cross_width - 1
+    if center_x + 1 < width:
+        draw.point(
+            (center_x + 1, center_y),
+            fill=(255, 235, 170),
+        )
 
-    horizontal_start = (height - cross_width) // 2
-    horizontal_end = horizontal_start + cross_width - 1
+    if center_y > 0:
+        draw.point(
+            (center_x, center_y - 1),
+            fill=(255, 235, 170),
+        )
 
-    draw.rectangle(
-        (0, horizontal_start, width - 1, horizontal_end),
-        fill=(255, 255, 0),
+    if center_y + 1 < height:
+        draw.point(
+            (center_x, center_y + 1),
+            fill=(255, 235, 170),
+        )
+
+    # Kleine Testpunkte zur Kontrolle einzelner Farben und Pixel.
+    accent_pixels = (
+        (
+            center_x - max_radius // 2,
+            center_y - max_radius // 3,
+            (35, 220, 190),
+        ),
+        (
+            center_x + max_radius // 2,
+            center_y + max_radius // 3,
+            (180, 75, 230),
+        ),
+        (
+            center_x - max_radius // 3,
+            center_y + max_radius // 2,
+            (255, 90, 70),
+        ),
+        (
+            center_x + max_radius // 3,
+            center_y - max_radius // 2,
+            (255, 185, 55),
+        ),
     )
-    draw.rectangle(
-        (vertical_start, 0, vertical_end, height - 1),
-        fill=(255, 255, 0),
-    )
+
+    for x, y, color in accent_pixels:
+        if 0 <= x < width and 0 <= y < height:
+            draw.point(
+                (x, y),
+                fill=color,
+            )
 
     buffer = BytesIO()
     image.save(
