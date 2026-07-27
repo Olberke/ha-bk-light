@@ -20,3 +20,5 @@ Thumbs.db
 # Home Assistant local files
 config/
 *.log
+
+*.bak
