@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 
 DEVICE_INFO_OPCODE = 0x8001
 
 # Confirmed or documented iPixel/BK-Light device-type identifiers.
 #
-# The ACT1026 response currently used by this integration contains 0x81.
+# The ACT1026 response tested with this integration contains 0x81.
 # The existing ACT1025 alternate response contains 0x83.
 KNOWN_DEVICE_DIMENSIONS: dict[int, tuple[int, int]] = {
     0x80: (64, 64),
@@ -18,6 +19,9 @@ KNOWN_DEVICE_DIMENSIONS: dict[int, tuple[int, int]] = {
     0x84: (96, 16),
     0x85: (64, 20),
 }
+
+MIN_CLOCK_STYLE = 0
+MAX_CLOCK_STYLE = 8
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,7 +50,90 @@ class BkLightDeviceInfo:
         return f"{self.width}x{self.height}"
 
 
-def parse_device_info_response(response: bytes) -> BkLightDeviceInfo:
+def build_time_command(current_time: datetime) -> bytes:
+    """Build the BK-Light time synchronization command.
+
+    This command also requests the device-information response used during
+    the initial protocol handshake.
+    """
+    hour = current_time.hour
+    minute = current_time.minute
+    second = current_time.second
+
+    if not 0 <= hour <= 23:
+        raise ValueError("Hour must be between 0 and 23")
+
+    if not 0 <= minute <= 59:
+        raise ValueError("Minute must be between 0 and 59")
+
+    if not 0 <= second <= 59:
+        raise ValueError("Second must be between 0 and 59")
+
+    return bytes(
+        (
+            8,       # Command length
+            0,       # Reserved
+            1,       # Command ID
+            0x80,    # Command type
+            hour,
+            minute,
+            second,
+            0,       # Language/reserved
+        )
+    )
+
+
+def build_clock_mode_command(
+    current_time: datetime,
+    *,
+    style: int = 1,
+    format_24h: bool = True,
+    show_date: bool = True,
+) -> bytes:
+    """Build the native BK-Light clock-mode command."""
+    if not MIN_CLOCK_STYLE <= style <= MAX_CLOCK_STYLE:
+        raise ValueError(
+            f"Clock style must be between "
+            f"{MIN_CLOCK_STYLE} and {MAX_CLOCK_STYLE}"
+        )
+
+    year = current_time.year % 100
+    month = current_time.month
+    day = current_time.day
+    day_of_week = current_time.isoweekday()
+
+    if not 0 <= year <= 99:
+        raise ValueError("Year must be between 0 and 99")
+
+    if not 1 <= month <= 12:
+        raise ValueError("Month must be between 1 and 12")
+
+    if not 1 <= day <= 31:
+        raise ValueError("Day must be between 1 and 31")
+
+    if not 1 <= day_of_week <= 7:
+        raise ValueError("Day of week must be between 1 and 7")
+
+    return bytes(
+        (
+            11,                      # Command length
+            0,                       # Reserved
+            6,                       # Command ID
+            1,                       # Command type
+            style,
+            1 if format_24h else 0,
+            1 if show_date else 0,
+            year,
+            month,
+            day,
+            day_of_week,
+        )
+    )
+
+
+def parse_device_info_response(
+    response: bytes,
+) -> BkLightDeviceInfo:
     """Parse a BK-Light device-info notification.
 
     The notification starts with:
@@ -55,8 +142,8 @@ def parse_device_info_response(response: bytes) -> BkLightDeviceInfo:
     - two-byte little-endian opcode;
     - one-byte device-type identifier.
 
-    Remaining bytes are intentionally preserved but not interpreted until their
-    exact meaning has been verified against real hardware.
+    Remaining bytes are intentionally preserved but not interpreted until
+    their exact meaning has been verified against real hardware.
     """
     if len(response) < 5:
         raise ValueError(

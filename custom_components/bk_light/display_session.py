@@ -7,6 +7,8 @@ import binascii
 from collections.abc import Callable, Sequence
 from io import BytesIO
 import logging
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from bleak.backends.characteristic import BleakGATTCharacteristic
 from bleak.backends.device import BLEDevice
@@ -21,7 +23,13 @@ from PIL import Image, ImageEnhance
 from homeassistant.components import bluetooth
 from homeassistant.components.bluetooth import BluetoothReachabilityIntent
 from homeassistant.core import HomeAssistant
-from .protocol import BkLightDeviceInfo, parse_device_info_response
+
+from .protocol import (
+    BkLightDeviceInfo,
+    build_clock_mode_command,
+    build_time_command,
+    parse_device_info_response,
+)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,7 +37,6 @@ _LOGGER = logging.getLogger(__name__)
 UUID_WRITE = "0000fa02-0000-1000-8000-00805f9b34fb"
 UUID_NOTIFY = "0000fa03-0000-1000-8000-00805f9b34fb"
 
-HANDSHAKE_FIRST = bytes.fromhex("08 00 01 80 0E 06 32 00")
 HANDSHAKE_SECOND = bytes.fromhex("04 00 05 80")
 
 ACK_STAGE_ONE = bytes.fromhex("0C 00 01 80 81 06 32 00 00 01 00 01")
@@ -248,6 +255,11 @@ class BleDisplaySession:
     The session uses Home Assistant's shared Bluetooth manager and therefore
     supports local adapters as well as connectable remote adapters.
     """
+    def _local_now(self) -> datetime:
+        """Return the current time in the configured Home Assistant timezone."""
+        return datetime.now(
+            ZoneInfo(self.hass.config.time_zone)
+        )
 
     def __init__(
         self,
@@ -552,6 +564,172 @@ class BleDisplaySession:
             self.rotation,
             self.brightness,
         )
+    async def async_display_clock(
+        self,
+        *,
+        style: int = 1,
+        format_24h: bool = True,
+        show_date: bool = True,
+        delay: float = 0.2,
+    ) -> None:
+        """Synchronize time and activate the native panel clock."""
+        if delay < 0:
+            raise ValueError(
+                "delay must be greater than or equal to 0"
+            )
+
+        if self._closing:
+            raise BkLightError(
+                "The BK-Light session is closing"
+            )
+
+        current_time = self._local_now()
+
+        time_command = build_time_command(current_time)
+        clock_command = build_clock_mode_command(
+            current_time,
+            style=style,
+            format_24h=format_24h,
+            show_date=show_date,
+        )
+
+        attempts = (
+            self.max_retries + 1
+            if self.auto_reconnect
+            else 1
+        )
+
+        async with self._send_lock:
+            for attempt in range(1, attempts + 1):
+                try:
+                    await self._async_display_clock_once(
+                        time_command=time_command,
+                        clock_command=clock_command,
+                        style=style,
+                        format_24h=format_24h,
+                        show_date=show_date,
+                        delay=delay,
+                    )
+                    return
+                except (
+                    *_RETRYABLE_EXCEPTIONS,
+                    BkLightError,
+                ) as err:
+                    self._reset_protocol_state()
+                    await self.async_disconnect()
+
+                    if attempt >= attempts:
+                        raise
+
+                    _LOGGER.debug(
+                        "%s: clock command failed on attempt "
+                        "%d/%d: %s",
+                        self.address,
+                        attempt,
+                        attempts,
+                        err,
+                    )
+
+                    await asyncio.sleep(
+                        self.reconnect_delay
+                    )
+
+        raise AssertionError("Unreachable")
+
+    async def _async_display_clock_once(
+        self,
+        *,
+        time_command: bytes,
+        clock_command: bytes,
+        style: int,
+        format_24h: bool,
+        show_date: bool,
+        delay: float,
+    ) -> None:
+        """Send the native clock command once."""
+        await self._ensure_connected()
+
+        client = self.client
+
+        if client is None or not client.is_connected:
+            raise ConnectionError(
+                f"{self.address}: Bluetooth connection was lost"
+            )
+
+        self.watcher.reset()
+        self.watcher.stage_one_payload = None
+
+        # The time synchronization command also returns device
+        # information through the notification characteristic.
+        await client.write_gatt_char(
+            UUID_WRITE,
+            time_command,
+            response=False,
+        )
+
+        await wait_for_ack(
+            self.watcher.stage_one,
+            "clock time synchronization",
+            self.address,
+            self.ack_timeout,
+            self.log_notifications,
+        )
+
+        stage_one_payload = self.watcher.stage_one_payload
+
+        if stage_one_payload is None:
+            raise BkLightProtocolError(
+                f"{self.address}: clock time synchronization "
+                "contained no device-information payload"
+            )
+
+        try:
+            device_info = parse_device_info_response(
+                stage_one_payload
+            )
+        except ValueError as err:
+            raise BkLightProtocolError(
+                f"{self.address}: invalid device-info "
+                f"response during clock synchronization: {err}"
+            ) from err
+
+        if device_info != self._device_info:
+            _LOGGER.info(
+                "%s: detected BK-Light device type 0x%02X, "
+                "dimensions %s, raw response %s",
+                self.address,
+                device_info.device_type,
+                device_info.dimensions_text,
+                bytes_to_hex(device_info.raw_response),
+            )
+
+        self._device_info = device_info
+
+        await asyncio.sleep(delay)
+
+        # Native clock commands are short control commands and are
+        # written without a GATT response, matching the documented
+        # protocol implementations.
+        await client.write_gatt_char(
+            UUID_WRITE,
+            clock_command,
+            response=False,
+        )
+
+        await asyncio.sleep(delay)
+
+        # Force a complete image handshake if a later action replaces
+        # the clock with a text, image or animation frame.
+        self._reset_protocol_state()
+
+        _LOGGER.info(
+            "%s: native clock activated: style=%d, "
+            "24h=%s, date=%s",
+            self.address,
+            style,
+            format_24h,
+            show_date,
+        )
 
     async def send_png(
         self,
@@ -621,9 +799,11 @@ class BleDisplaySession:
         if not self._handshake_primed:
             self.watcher.stage_one_payload = None
 
+            time_command = build_time_command(self._local_now())
+
             await client.write_gatt_char(
                 UUID_WRITE,
-                HANDSHAKE_FIRST,
+                time_command,
                 response=False,
             )
 
