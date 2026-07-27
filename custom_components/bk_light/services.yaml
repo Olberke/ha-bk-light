@@ -352,8 +352,6 @@ play_gif:
           default: false
           selector:
             boolean:
-
-
 stop_animation:
   fields:
     config_entry_id:
@@ -361,3 +359,32 @@ stop_animation:
       selector:
         config_entry:
           integration: bk_light
+display_clock:
+  fields:
+    config_entry_id:
+      required: true
+      selector:
+        config_entry:
+          integration: bk_light
+
+    clock_settings:
+      collapsed: false
+      fields:
+        style:
+          default: 1
+          selector:
+            number:
+              min: 0
+              max: 8
+              step: 1
+              mode: slider
+
+        format_24h:
+          default: true
+          selector:
+            boolean:
+
+        show_date:
+          default: true
+          selector:
+            boolean:

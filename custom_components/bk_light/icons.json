@@ -32,6 +32,12 @@
     },
     "stop_animation": {
       "service": "mdi:stop-circle-outline"
+    },
+    "display_clock": {
+      "service": "mdi:clock-digital",
+      "sections": {
+        "clock_settings": "mdi:clock-outline"
+      }
     }
   }
 }

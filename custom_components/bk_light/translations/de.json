@@ -312,6 +312,34 @@
         }
       }
     },
+    "display_clock": {
+      "name": "Uhr anzeigen",
+      "description": "Synchronisiert die Panelzeit und aktiviert den nativen Uhrenmodus.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "BK-Light Display auswählen."
+        },
+        "style": {
+          "name": "Uhrendesign",
+          "description": "Natives Uhrendesign von 0 bis 8 auswählen."
+        },
+        "format_24h": {
+          "name": "24-Stunden-Format",
+          "description": "24-Stunden-Anzeige statt 12-Stunden-Anzeige verwenden."
+        },
+        "show_date": {
+          "name": "Datum anzeigen",
+          "description": "Datum anzeigen, wenn das gewählte Uhrendesign es unterstützt."
+        }
+      },
+      "sections": {
+        "clock_settings": {
+          "name": "Uhreinstellungen",
+          "description": "Nativen Uhrenmodus des Panels konfigurieren."
+        }
+      }
+    },
     "stop_animation": {
       "name": "Animation stoppen",
       "description": "Stoppt die aktuell laufende Laufschrift oder GIF-Animation.",

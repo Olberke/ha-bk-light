@@ -312,6 +312,34 @@
         }
       }
     },
+    "display_clock": {
+      "name": "Display clock",
+      "description": "Synchronizes the panel time and activates the native clock mode.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Display",
+          "description": "Select the BK-Light display."
+        },
+        "style": {
+          "name": "Clock style",
+          "description": "Select the native clock design from 0 to 8."
+        },
+        "format_24h": {
+          "name": "24-hour format",
+          "description": "Use 24-hour time instead of 12-hour time."
+        },
+        "show_date": {
+          "name": "Show date",
+          "description": "Show the date when supported by the selected clock style."
+        }
+      },
+      "sections": {
+        "clock_settings": {
+          "name": "Clock settings",
+          "description": "Configure the native panel clock."
+        }
+      }
+    },
     "stop_animation": {
       "name": "Stop animation",
       "description": "Stops the current scrolling-text or GIF animation.",

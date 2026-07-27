@@ -48,6 +48,9 @@ from .const import (
     ATTR_VERTICAL_ALIGN,
     ATTR_X_OFFSET,
     ATTR_Y_OFFSET,
+    ATTR_CLOCK_FORMAT_24H,
+    ATTR_CLOCK_SHOW_DATE,
+    ATTR_CLOCK_STYLE,
     DEFAULT_AUTO_FIT,
     DEFAULT_BACKGROUND_COLOR,
     DEFAULT_FONT_SIZE,
@@ -67,6 +70,9 @@ from .const import (
     DEFAULT_SCROLL_STEP,
     DEFAULT_TEXT_COLOR,
     DEFAULT_VERTICAL_ALIGN,
+    DEFAULT_CLOCK_FORMAT_24H,
+    DEFAULT_CLOCK_SHOW_DATE,
+    DEFAULT_CLOCK_STYLE,
     DOMAIN,
     PANEL_HEIGHT,
     PANEL_WIDTH,
@@ -75,6 +81,7 @@ from .const import (
     SERVICE_PLAY_GIF,
     SERVICE_SCROLL_TEXT,
     SERVICE_STOP_ANIMATION,
+    SERVICE_DISPLAY_CLOCK,
 )
 from .display_session import BkLightError, BleDisplaySession
 from .image_renderer import (
@@ -245,6 +252,27 @@ SCROLL_TEXT_SCHEMA = vol.Schema(
 STOP_ANIMATION_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+    }
+)
+
+DISPLAY_CLOCK_SCHEMA = vol.Schema(
+    {
+        vol.Required(ATTR_CONFIG_ENTRY_ID): cv.string,
+        vol.Optional(
+            ATTR_CLOCK_STYLE,
+            default=DEFAULT_CLOCK_STYLE,
+        ): vol.All(
+            vol.Coerce(int),
+            vol.Range(min=0, max=8),
+        ),
+        vol.Optional(
+            ATTR_CLOCK_FORMAT_24H,
+            default=DEFAULT_CLOCK_FORMAT_24H,
+        ): cv.boolean,
+        vol.Optional(
+            ATTR_CLOCK_SHOW_DATE,
+            default=DEFAULT_CLOCK_SHOW_DATE,
+        ): cv.boolean,
     }
 )
 
@@ -512,6 +540,38 @@ async def async_setup(
                 f"{_format_exception(err)}"
             ) from err
 
+    async def async_handle_display_clock(
+        call: ServiceCall,
+    ) -> None:
+        """Synchronize time and activate the native clock."""
+        entry, runtime = _get_runtime(
+            hass,
+            call.data[ATTR_CONFIG_ENTRY_ID],
+        )
+
+        try:
+            await runtime.async_stop_animation()
+
+            await runtime.session.async_display_clock(
+                style=call.data[ATTR_CLOCK_STYLE],
+                format_24h=call.data[ATTR_CLOCK_FORMAT_24H],
+                show_date=call.data[ATTR_CLOCK_SHOW_DATE],
+            )
+        except BkLightError as err:
+            _LOGGER.exception(
+                "BK-Light clock activation failed for %s",
+                entry.title,
+            )
+            raise HomeAssistantError(
+                f"Der Uhrenmodus konnte nicht aktiviert werden: "
+                f"{_format_exception(err)}"
+            ) from err
+        except (OSError, RuntimeError, ValueError) as err:
+            raise HomeAssistantError(
+                f"Der Uhrenmodus konnte nicht vorbereitet werden: "
+                f"{_format_exception(err)}"
+            ) from err
+
     async def async_handle_stop_animation(
         call: ServiceCall,
     ) -> None:
@@ -676,6 +736,11 @@ async def async_setup(
             ) from err
 
     action_registrations = (
+        (
+            SERVICE_DISPLAY_CLOCK,
+            async_handle_display_clock,
+            DISPLAY_CLOCK_SCHEMA,
+        ),
         (
             SERVICE_DISPLAY_TEXT,
             async_handle_display_text,
