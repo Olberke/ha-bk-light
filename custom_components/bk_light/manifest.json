@@ -1,7 +1,7 @@
 {
   "domain": "bk_light",
   "name": "BK-Light LED Matrix",
-  "version": "0.6.2b0",
+  "version": "0.6.2b1",
   "config_flow": true,
   "integration_type": "device",
   "iot_class": "local_push",
